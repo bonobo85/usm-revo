@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --fond: #0B1221;
+  --fond-clair: #101A2E;
+  --fond-carte: #16233D;
+  --bleu: #1B3E7C;
+  --bleu-clair: #2E5AA8;
+  --or: #A67C4E;
+  --or-clair: #C9994F;
+  --rouge: #B32134;
+  --gris-bordure: #2B3A5C;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background-color: var(--fond);
+  color: #E5E7EB;
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Arrière-plan avec subtil dégradé bleu marine */
+body {
+  background: linear-gradient(180deg, #0B1221 0%, #0A1020 100%);
+  background-attachment: fixed;
+}
+
+/* Scrollbar dans les tons USM */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--fond-clair);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gris-bordure);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--or);
+}
+
+/* Sélection de texte dorée */
+::selection {
+  background-color: var(--or);
+  color: var(--fond);
+}
+
+/* Classes utilitaires */
+@layer components {
+  .carte {
+    @apply bg-fond-carte border border-gris-bordure rounded-lg p-4;
+  }
+
+  .carte-hover {
+    @apply carte transition-all hover:border-or cursor-pointer;
+  }
+
+  /* Bouton principal = bleu marine USM */
+  .bouton-bleu {
+    @apply bg-bleu hover:bg-bleu-clair text-white font-medium px-4 py-2 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Bouton accent = or/bronze USM */
+  .bouton-or {
+    @apply bg-or hover:bg-or-clair text-fond font-semibold px-4 py-2 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .bouton-gris {
+    @apply bg-fond-clair hover:bg-gris-bordure border border-gris-bordure text-gray-200 font-medium px-4 py-2 rounded-md transition-colors;
+  }
+
+  /* Bouton danger = rouge USM (pas rouge vif) */
+  .bouton-rouge {
+    @apply bg-rouge hover:bg-rouge-clair text-white font-medium px-4 py-2 rounded-md transition-colors;
+  }
+
+  .bouton-vert {
+    @apply bg-emerald-700 hover:bg-emerald-600 text-white font-medium px-4 py-2 rounded-md transition-colors;
+  }
+
+  .input {
+    @apply w-full bg-fond-clair border border-gris-bordure text-white rounded-md px-3 py-2 focus:border-or focus:outline-none transition-colors;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-gray-300 mb-1;
+  }
+
+  .titre-page {
+    @apply text-2xl font-bold text-white;
+  }
+
+  .titre-section {
+    @apply text-lg font-semibold text-white mb-3;
+  }
+
+  .tableau {
+    @apply w-full text-sm text-left text-gray-300;
+  }
+
+  .tableau thead {
+    @apply bg-fond-clair text-or-clair uppercase text-xs border-b border-or/30;
+  }
+
+  .tableau th {
+    @apply px-4 py-3;
+  }
+
+  .tableau td {
+    @apply px-4 py-3 border-b border-gris-bordure;
+  }
+
+  .tableau tbody tr:hover {
+    @apply bg-fond-clair;
+  }
+
+  .badge-statut {
+    @apply inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium;
+  }
+
+  /* Accent or — pour bordures de mise en valeur */
+  .bordure-or {
+    @apply border border-or/40;
+  }
+
+  /* Séparateur doré (inspiré du sceau) */
+  .separateur-or {
+    @apply border-t border-or/30;
+  }
+}
