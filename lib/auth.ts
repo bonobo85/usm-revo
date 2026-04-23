@@ -9,13 +9,13 @@ export const authOptions: NextAuthOptions = {
     DiscordProvider({
       clientId: process.env.DISCORD_CLIENT_ID!,
       clientSecret: process.env.DISCORD_CLIENT_SECRET!,
-      authorization: { params: { scope: 'identify email' } },
+      authorization: { params: { scope: 'identify' } },
     }),
   ],
   session: {
     strategy: 'jwt',
-    maxAge: 7 * 24 * 60 * 60, // 7 jours (au lieu de 30)
-    updateAge: 60 * 60, // Refresh toutes les heures
+    maxAge: 7 * 24 * 60 * 60,
+    updateAge: 60 * 60,
   },
   secret: process.env.NEXTAUTH_SECRET,
   pages: { signIn: '/login' },
@@ -41,7 +41,6 @@ export const authOptions: NextAuthOptions = {
 
       const discord_id = account.providerAccountId;
       const username = (profile as any)?.username || user.name || 'Inconnu';
-      const email = user.email || null;
       const avatar = (profile as any)?.avatar
         ? `https://cdn.discordapp.com/avatars/${discord_id}/${(profile as any).avatar}.png`
         : null;
@@ -59,7 +58,6 @@ export const authOptions: NextAuthOptions = {
             .insert({
               discord_id,
               username,
-              email,
               avatar_url: avatar,
               rank_level: 1,
               statut: 'disponible',
@@ -72,7 +70,6 @@ export const authOptions: NextAuthOptions = {
             return false;
           }
 
-          // Audit + webhook
           await admin.from('audit_logs').insert({
             acteur_id: nouveau.id,
             action: 'inscription',
@@ -80,12 +77,11 @@ export const authOptions: NextAuthOptions = {
           });
           await notifNouveauMembre({ username, avatar_url: avatar });
         } else {
-          // Compte désactivé → refus
           if (!existant.is_active) return false;
 
           await admin
             .from('users')
-            .update({ username, email, avatar_url: avatar, statut: 'disponible' })
+            .update({ username, avatar_url: avatar, statut: 'disponible' })
             .eq('discord_id', discord_id);
 
           await admin.from('audit_logs').insert({
@@ -114,14 +110,8 @@ export const authOptions: NextAuthOptions = {
           .eq('discord_id', discord_id)
           .maybeSingle();
 
-        if (!u) {
-          return { ...token, is_active: false } as any;
-        }
-
-        // Compte désactivé → invalide la session
-        if (!u.is_active) {
-          return { ...token, is_active: false } as any;
-        }
+        if (!u) return { ...token, is_active: false } as any;
+        if (!u.is_active) return { ...token, is_active: false } as any;
 
         const { data: perms } = await admin
           .from('user_permissions')
@@ -138,7 +128,6 @@ export const authOptions: NextAuthOptions = {
         token.permissions = perms?.map((p) => p.permission) || [];
         token.is_active = u.is_active;
 
-        // JWT custom pour Supabase RLS
         const supabaseJwt = jwt.sign(
           {
             sub: u.id,
@@ -146,7 +135,7 @@ export const authOptions: NextAuthOptions = {
             rank_level: u.rank_level,
             aud: 'authenticated',
             role: 'authenticated',
-            exp: Math.floor(Date.now() / 1000) + 60 * 60 * 2, // 2h
+            exp: Math.floor(Date.now() / 1000) + 60 * 60 * 2,
           },
           process.env.NEXTAUTH_SECRET!
         );
