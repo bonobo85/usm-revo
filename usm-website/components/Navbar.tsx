@@ -15,7 +15,9 @@ import { NotificationBell } from './NotificationBell';
 
 export function Navbar() {
   const pathname = usePathname();
-  const { user, rang, badges } = useUser();
+  const { user, rang } = useUser();
+  const badges: string[] = ((user as any)?.badges) || [];
+  const surnom: string | null = ((user as any)?.surnom) || null;
   const [menuMobile, setMenuMobile] = useState(false);
   const [menuProfil, setMenuProfil] = useState(false);
   const [menuPlus, setMenuPlus] = useState(false);
@@ -132,7 +134,7 @@ export function Navbar() {
                     <Avatar src={user.avatar_url} nom={user.username} taille={32} />
                     <div className="hidden md:block text-left">
                       <p className="text-white text-xs font-medium leading-tight">
-                        {user.surnom || user.username}
+                        {surnom || user.username}
                       </p>
                       <p className="text-texte-gris text-xs leading-tight">{user.rank_nom}</p>
                     </div>
@@ -209,7 +211,7 @@ export function Navbar() {
                 <Avatar src={user.avatar_url} nom={user.username} taille={44} />
                 <div className="flex-1 min-w-0">
                   <p className="text-white text-sm font-medium truncate">
-                    {user.surnom || user.username}
+                    {surnom || user.username}
                   </p>
                   <RankBadge rang={user.rank_level} taille="sm" />
                 </div>
