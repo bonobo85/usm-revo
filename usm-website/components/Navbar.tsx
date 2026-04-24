@@ -7,7 +7,7 @@ import { signOut } from 'next-auth/react';
 import { Menu, X, LogOut, ChevronDown } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useUser } from '@/hooks/useUser';
-import { liensNavigation } from '@/lib/navigation';
+import { liensPrincipaux as fPrincipaux, liensPlus as fPlus, liensVisibles as fVisibles } from '@/lib/navigation';
 import { cn } from '@/lib/utils';
 import { RankBadge } from './RankBadge';
 import { Avatar } from './Avatar';
@@ -15,7 +15,7 @@ import { NotificationBell } from './NotificationBell';
 
 export function Navbar() {
   const pathname = usePathname();
-  const { user, hasRang } = useUser();
+  const { user, rang, badges } = useUser();
   const [menuMobile, setMenuMobile] = useState(false);
   const [menuProfil, setMenuProfil] = useState(false);
   const [menuPlus, setMenuPlus] = useState(false);
@@ -39,10 +39,9 @@ export function Navbar() {
     setMenuProfil(false);
   }, [pathname]);
 
-  const liensVisibles = liensNavigation.filter((l) => hasRang(l.rangMin));
-  // Sur desktop, on affiche les 6 premiers + un "Plus ▼"
-  const liensPrincipaux = liensVisibles.slice(0, 6);
-  const liensSupp = liensVisibles.slice(6);
+  const liensVisibles = fVisibles(rang, badges);
+  const liensPrincipaux = fPrincipaux(rang, badges);
+  const liensSupp = fPlus(rang, badges);
 
   return (
     <>
@@ -132,7 +131,9 @@ export function Navbar() {
                   >
                     <Avatar src={user.avatar_url} nom={user.username} taille={32} />
                     <div className="hidden md:block text-left">
-                      <p className="text-white text-xs font-medium leading-tight">{user.username}</p>
+                      <p className="text-white text-xs font-medium leading-tight">
+                        {user.surnom || user.username}
+                      </p>
                       <p className="text-texte-gris text-xs leading-tight">{user.rank_nom}</p>
                     </div>
                     <ChevronDown size={14} className={cn('text-texte-gris transition-transform', menuProfil && 'rotate-180')} />
@@ -207,7 +208,9 @@ export function Navbar() {
               >
                 <Avatar src={user.avatar_url} nom={user.username} taille={44} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-medium truncate">{user.username}</p>
+                  <p className="text-white text-sm font-medium truncate">
+                    {user.surnom || user.username}
+                  </p>
                   <RankBadge rang={user.rank_level} taille="sm" />
                 </div>
               </Link>

@@ -169,7 +169,7 @@ drop policy if exists att_select on attestations;
 create policy att_select on attestations for select
   using (beneficiaire_id = mon_user_id() or est_colead_min());
 
-drop policy if exists att_all on attestations for all;
+drop policy if exists att_all on attestations;
 create policy att_all on attestations for all
   using (est_colead_min())
   with check (est_colead_min());

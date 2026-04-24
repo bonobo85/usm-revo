@@ -8,7 +8,6 @@
 -- ============================================================
 alter table users
   add column if not exists surnom text,
-  add column if not exists matricule text unique,
   add column if not exists date_naissance date,
   add column if not exists lieu_naissance text,
   add column if not exists telephone text,
@@ -17,30 +16,13 @@ alter table users
   add column if not exists permis_url text,
   add column if not exists derniere_connexion timestamptz;
 
-create index if not exists idx_users_matricule on users(matricule);
 create index if not exists idx_users_surnom on users(surnom);
 
--- Sequence pour matricule DPT-XXX
-create sequence if not exists seq_matricule start with 100;
-
-create or replace function attribuer_matricule()
-returns trigger as $$
-begin
-  if new.matricule is null then
-    new.matricule := 'DPT-' || lpad(nextval('seq_matricule')::text, 3, '0');
-  end if;
-  return new;
-end;
-$$ language plpgsql;
-
+-- Nettoyage si une migration precedente avait installe l'auto-matricule
 drop trigger if exists trg_users_matricule on users;
-create trigger trg_users_matricule
-  before insert on users
-  for each row execute function attribuer_matricule();
-
--- Backfill matricules manquants
-update users set matricule = 'DPT-' || lpad(nextval('seq_matricule')::text, 3, '0')
-where matricule is null;
+drop function if exists attribuer_matricule();
+drop sequence if exists seq_matricule;
+alter table users drop column if exists matricule;
 
 -- ============================================================
 -- 2. BADGES : nouvelle liste + ordre d'affichage

@@ -3,7 +3,6 @@ import DiscordProvider from 'next-auth/providers/discord';
 import jwt from 'jsonwebtoken';
 import { supabaseAdmin } from './supabase';
 import { notifNouveauMembre } from './discord';
-import { syncUserFromGuild } from './discordGuild';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -111,7 +110,7 @@ export const authOptions: NextAuthOptions = {
       try {
         const { data: u } = await admin
           .from('users')
-          .select('id, discord_id, username, avatar_url, rank_level, is_active, ranks(nom)')
+          .select('id, discord_id, username, avatar_url, rank_level, is_active, surnom, ranks(nom)')
           .eq('discord_id', discord_id)
           .maybeSingle();
 
@@ -130,6 +129,13 @@ export const authOptions: NextAuthOptions = {
           .eq('user_id', u.id)
           .is('deleted_at', null);
 
+        const { data: ubs } = await admin
+          .from('user_badges')
+          .select('badges(code)')
+          .eq('user_id', u.id)
+          .eq('is_active', true)
+          .is('deleted_at', null);
+
         token.user_id = u.id;
         token.discord_id = u.discord_id;
         (token as any).username = u.username;
@@ -137,6 +143,8 @@ export const authOptions: NextAuthOptions = {
         token.rank_level = u.rank_level;
         token.rank_nom = (u.ranks as any)?.nom || 'BCSO';
         token.permissions = perms?.map((p) => p.permission) || [];
+        token.badges = (ubs || []).map((b: any) => b.badges?.code).filter(Boolean);
+        token.surnom = (u as any).surnom ?? null;
         token.is_active = u.is_active;
 
         // JWT custom pour Supabase RLS
@@ -172,6 +180,8 @@ export const authOptions: NextAuthOptions = {
         rank_level: token.rank_level,
         rank_nom: token.rank_nom,
         permissions: token.permissions || [],
+        badges: token.badges || [],
+        surnom: token.surnom ?? null,
         is_active: token.is_active,
       };
       session.accessToken = token.access_token;

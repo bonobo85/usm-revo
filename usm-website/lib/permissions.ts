@@ -66,3 +66,43 @@ export function couleurRang(level: number): string {
 export function nomRang(level: number): string {
   return NOMS_RANGS[level] || 'Inconnu';
 }
+
+// ==============================
+// Helpers de seuils (lisibilité)
+// ==============================
+export const estOpSecondMin = (r?: number | null) => aLeRang(r, RANGS.OPERATEUR_2);
+export const estOperateurMin = (r?: number | null) => aLeRang(r, RANGS.OPERATEUR);
+export const estColeadMin = (r?: number | null) => aLeRang(r, RANGS.COLEADER);
+export const estLeadMin = (r?: number | null) => aLeRang(r, RANGS.LEADER);
+
+// ==============================
+// Visibilité CRASH / Formateurs
+// ==============================
+export function peutVoirCrash(rang?: number | null, badges?: string[] | null): boolean {
+  return estColeadMin(rang) || (badges?.includes('CRASH') ?? false);
+}
+
+export function peutVoirFormateurs(rang?: number | null, badges?: string[] | null): boolean {
+  return estColeadMin(rang) || (badges?.includes('FORMATEUR') ?? false);
+}
+
+// ==============================
+// Badges : ordre fixe d'affichage
+// ==============================
+export const ORDRE_BADGES: Record<string, number> = {
+  CRASH: 1,
+  FORMATEUR: 2,
+  INSTRUCTEUR: 3,
+  NEGOCIATEUR: 4,
+  BMO: 5,
+  DRONE: 6,
+  GAV: 7,
+  BRACELET: 8,
+  FEDERAL: 9,
+};
+
+export function trierBadges<T extends { code: string }>(badges: T[]): T[] {
+  return [...badges].sort(
+    (a, b) => (ORDRE_BADGES[a.code] || 99) - (ORDRE_BADGES[b.code] || 99)
+  );
+}

@@ -11,6 +11,8 @@ declare module 'next-auth' {
       rank_level: number;
       rank_nom: string;
       permissions: string[];
+      badges: string[];
+      surnom: string | null;
       is_active: boolean;
     };
     accessToken?: string;
@@ -24,6 +26,8 @@ declare module 'next-auth/jwt' {
     rank_level: number;
     rank_nom: string;
     permissions: string[];
+    badges: string[];
+    surnom: string | null;
     is_active: boolean;
     access_token?: string;
   }
