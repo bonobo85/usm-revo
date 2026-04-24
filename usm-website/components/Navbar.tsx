@@ -7,7 +7,7 @@ import { signOut } from 'next-auth/react';
 import { Menu, X, LogOut, ChevronDown } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useUser } from '@/hooks/useUser';
-import { liensPrincipaux as fPrincipaux, liensPlus as fPlus, liensVisibles as fVisibles } from '@/lib/navigation';
+import * as Nav from '@/lib/navigation';
 import { cn } from '@/lib/utils';
 import { RankBadge } from './RankBadge';
 import { Avatar } from './Avatar';
@@ -39,9 +39,9 @@ export function Navbar() {
     setMenuProfil(false);
   }, [pathname]);
 
-  const liensVisibles = fVisibles(rang, badges);
-  const liensPrincipaux = fPrincipaux(rang, badges);
-  const liensSupp = fPlus(rang, badges);
+  const liensVisibles = Nav.liensVisibles(rang, badges);
+  const liensPrincipaux = Nav.liensPrincipaux(rang, badges);
+  const liensSupp = Nav.liensPlus(rang, badges);
 
   return (
     <>
