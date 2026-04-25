@@ -54,6 +54,15 @@ body {
   color: var(--fond);
 }
 
+/* Scrollbar masquée (utilisée pour le DateTimePicker iOS) */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 /* Classes utilitaires */
 @layer components {
   .carte {

@@ -85,7 +85,13 @@ export const authOptions: NextAuthOptions = {
 
           await admin
             .from('users')
-            .update({ username, email, avatar_url: avatar, statut: 'disponible' })
+            .update({
+              username,
+              email,
+              avatar_url: avatar,
+              statut: 'disponible',
+              derniere_connexion: new Date().toISOString(),
+            })
             .eq('discord_id', discord_id);
 
           await admin.from('audit_logs').insert({
@@ -146,6 +152,12 @@ export const authOptions: NextAuthOptions = {
         token.badges = (ubs || []).map((b: any) => b.badges?.code).filter(Boolean);
         token.surnom = (u as any).surnom ?? null;
         token.is_active = u.is_active;
+
+        // Heartbeat de présence (refresh JWT toutes les heures)
+        await admin
+          .from('users')
+          .update({ derniere_connexion: new Date().toISOString() })
+          .eq('id', u.id);
 
         // JWT custom pour Supabase RLS
         const supabaseJwt = jwt.sign(

@@ -9,7 +9,9 @@ import { RankBadge } from '@/components/RankBadge';
 import { Avatar } from '@/components/Avatar';
 import { useSupabase } from '@/hooks/useSupabase';
 import { useUser } from '@/hooks/useUser';
-import { NOMS_RANGS, peutAttribuerRang } from '@/lib/permissions';
+import { NOMS_RANGS, peutAttribuerRang, couleurRang } from '@/lib/permissions';
+import { dateTime } from '@/lib/utils';
+import { Wifi } from 'lucide-react';
 
 export default function PageAdmin() {
   const supabase = useSupabase();
@@ -100,12 +102,59 @@ export default function PageAdmin() {
       <Tabs
         onglets={[
           { id: 'rangs', label: 'Gestion des rangs' },
+          { id: 'connectes', label: 'Connectés', icone: Wifi },
           { id: 'permissions', label: 'Permissions' },
           { id: 'vue', label: "Vue d'ensemble" },
         ]}
         actif={onglet}
         onChange={setOnglet}
       />
+
+      {onglet === 'connectes' && (
+        <div className="space-y-2">
+          {(() => {
+            const maintenant = Date.now();
+            const SEUIL_ENLIGNE = 5 * 60 * 1000;        // < 5 min = en ligne
+            const SEUIL_RECEMMENT = 60 * 60 * 1000;     // < 1 h  = récent
+            const trie = [...membres]
+              .filter((m) => m.is_active)
+              .sort((a, b) => {
+                const ta = a.derniere_connexion ? new Date(a.derniere_connexion).getTime() : 0;
+                const tb = b.derniere_connexion ? new Date(b.derniere_connexion).getTime() : 0;
+                return tb - ta;
+              });
+            return trie.map((m) => {
+              const ts = m.derniere_connexion ? new Date(m.derniere_connexion).getTime() : 0;
+              const diff = ts ? maintenant - ts : Infinity;
+              const enLigne = diff < SEUIL_ENLIGNE;
+              const recemment = diff < SEUIL_RECEMMENT;
+              const dot = enLigne ? 'bg-emerald-500' : recemment ? 'bg-amber-500' : 'bg-gray-500';
+              const couleur = couleurRang(m.rank_level);
+              return (
+                <div key={m.id} className="carte !p-3 flex items-center gap-3 flex-wrap" style={{ borderLeftWidth: 3, borderLeftColor: couleur }}>
+                  <div className="relative">
+                    <Avatar src={m.avatar_url} nom={m.username} taille={36} />
+                    <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full ring-2 ring-fond-carte ${dot}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-medium truncate">{m.surnom || m.username}</p>
+                    <p className="text-xs" style={{ color: couleur }}>{NOMS_RANGS[m.rank_level]}</p>
+                  </div>
+                  <div className="text-right text-xs">
+                    {enLigne ? (
+                      <span className="text-emerald-400 font-semibold">En ligne</span>
+                    ) : ts ? (
+                      <span className="text-texte-gris">Vu {dateTime(m.derniere_connexion)}</span>
+                    ) : (
+                      <span className="text-texte-gris italic">Jamais connecté</span>
+                    )}
+                  </div>
+                </div>
+              );
+            });
+          })()}
+        </div>
+      )}
 
       {onglet === 'rangs' && (
         <div className="carte p-0">
